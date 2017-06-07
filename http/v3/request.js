@@ -1,0 +1,1 @@
+org.eclipse.dirigible.api.v3.http.HttpRequestFacade.getMethod();
