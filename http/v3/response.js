@@ -15,3 +15,7 @@ var java = require('core/v3/java');
 exports.println = function(text) {
 	java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'println', [text]);
 };
+
+exports.setContentType = function(contentType) {
+	java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'setContentType', [contentType]);
+};
