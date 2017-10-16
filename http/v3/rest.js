@@ -26,8 +26,12 @@ var HttpController = exports.HttpController = function(oConfiguration){
 				resolvedPath = pathDef;
 				matches.push({w:1, p: resolvedPath, d: pathDef});
 			} else {
-				var pathDefSegments = pathDef.split('/');
-				var reqPathSegments = requestPath.split('/');
+				var pathDefSegments = pathDef.split('/');					
+				var reqPathSegments;
+				if(requestPath.trim().length>0)
+					reqPathSegments = requestPath.split('/');
+				else
+					reqPathSegments = [];
 				if(pathDefSegments.length === reqPathSegments.length){
 					var verbHandlers = Object.keys(cfg[pathDef]);
 					if(verbHandlers && verbHandlers.length>0 && verbHandlers.indexOf(method)>-1){
