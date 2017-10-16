@@ -1,8 +1,17 @@
-/* globals $ */
+/*******************************************************************************
+ * Copyright (c) 2017 SAP and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * Contributors:
+ * SAP - initial API and implementation
+ *******************************************************************************/
+
 /* eslint-env node, dirigible */
 
 var HttpController = exports.HttpController = function(oConfiguration){
-	//this.logger = require('log/loggers').get('arestme/HttpController');
+	this.logger = require('logger/loggers').get('http/rest/HttpController');
 	//var xss = require("utils/xss");
 	this._oConfiguration = oConfiguration || {};
 	var self =this;
@@ -190,10 +199,10 @@ var HttpController = exports.HttpController = function(oConfiguration){
 			if(!ctx.err){
 				resourceHandler.handler.apply(self, [ctx, io]);
 				HttpController.prototype.closeResponse.call(this);
-				//self.logger.info('Serving request for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' finished');
+				self.logger.info('Serving request for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' finished');
 			}
 		} else {
-			//self.logger.error('No suitable resource handler for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' found');
+			self.logger.error('No suitable resource handler for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' found');
 			self.sendError(io.response.BAD_REQUEST, 'Bad Request');
 		}		
   	};
@@ -212,7 +221,7 @@ HttpController.prototype.addResourceHandlers = function(handlersMap){
 		for(var j=0; j<verbHandlerNames.length;j++){
 			var verbHandlerDefs = handlersMap[aResourcePaths[i]][verbHandlerNames[j]];
 			if(verbHandlerDefs.constructor !== Array){//Accept objects for backwards compatibility
-				//this.logger.warn('Verb handler value must be an array of objects. Objects will not be supported in near future');
+				this.logger.warn('Verb handler value must be an array of objects. Objects will not be supported in near future');
 				verbHandlerDefs = [verbHandlerDefs]
 			}
 			for(var k = 0; k<verbHandlerDefs.length; k++){
