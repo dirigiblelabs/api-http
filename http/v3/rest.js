@@ -11,7 +11,7 @@
 /* eslint-env node, dirigible */
 
 var HttpController = exports.HttpController = function(oConfiguration){
-	this.logger = require('logger/loggers').get('http/rest/HttpController');
+	this.logger = require('log/loggers').get('http/rest/HttpController');
 	//var xss = require("utils/xss");
 	this._oConfiguration = oConfiguration || {};
 	var self =this;
