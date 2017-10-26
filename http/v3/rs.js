@@ -11,7 +11,7 @@
 /* eslint-env node, dirigible */
 
 var HttpController = exports.HttpController = function(oConfiguration){
-	this.logger = require('log/loggers').get('http/rest/HttpController');
+	this.logger = require('log/logging').getLogger('http.rs.controller');
 	//var xss = require("utils/xss");
 	this._oConfiguration = oConfiguration || {};
 	var self =this;
@@ -124,20 +124,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 		}
 		return isProduceMatched && isConsumeMatched;
 	};
-	
-	var getHttpResourcePath = function(uri){
-		var requestUrl = decodeURI();
-		var requestUrlSegments = requestUrl.split('/');
-		var inResourcePath = false;
-		requestUrlSegments = requestUrlSegments.filter(function(seg){
-			if(seg.trim().lastIndexOf('.js')>-1){
-				inResourcePath = true;
-			}
-			return inResourcePath;
-		});
-		return requestUrlSegments.join('/');
-	};
-		
+			
 	var queryStringToMap = function(queryString){
 		if(!queryString)
 			return;
@@ -161,8 +148,8 @@ var HttpController = exports.HttpController = function(oConfiguration){
 	
   	this.service = function(request, response){
   
-  		request = request || require("http/request");
-		var requestPath = request.getPathInfo().substring(request.getPathInfo().indexOf('.js')+4, request.getPathInfo().length);//temporary solution for missing dedicated service path accessor
+  		request = request || require("http/v3/request");
+		var requestPath = request.getResourcePath();
 		var method = request.getMethod().toLowerCase();
 		
 		var matches = matchRequestUrl(requestPath, method, self._oConfiguration);
@@ -176,11 +163,11 @@ var HttpController = exports.HttpController = function(oConfiguration){
 			}
 		}
 		
-		response = response || require("http/response");
+		response = response || require("http/v3/response");
 		var queryParams = queryStringToMap(request.getQueryString()) || {};		
 		var acceptsHeader = normalizeMediaTypeHeaderValue(request.getHeader('Accept')) || '[]';
 		var contentTypeHeader = normalizeMediaTypeHeaderValue(request.getHeader('Content-Type')) || '[]';
-		var resourcePath = getHttpResourcePath(request.getRequestURI());
+		var resourcePath = requestPath;
 		var io = {request: request, response:response};
 		
 		if(resourceHandler){
@@ -195,18 +182,18 @@ var HttpController = exports.HttpController = function(oConfiguration){
 				ctx.pathParams = matches[0].pathParams;
 			}
 			ctx.queryParams = queryParams;
-			if(resourceHandler.beforeHandle){
-			 	if(resourceHandler.beforeHandle.constructor !== Function)
+			if(resourceHandler.beforeHandler){
+			 	if(resourceHandler.beforeHandler.constructor !== Function)
 			 		throw Error('Invalid configuration exception: verbHandler.beforeHandle is not a function');
-				resourceHandler.beforeHandle.apply(self, [ctx, io]);
+				resourceHandler.beforeHandler.apply(self, [ctx, io]);
 			}
 			if(!ctx.err){
 				resourceHandler.handler.apply(self, [ctx, io]);
 				HttpController.prototype.closeResponse.call(this);
-				self.logger.info('Serving request for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' finished');
+				self.logger.info('Serving request for resource [{}], Verb[{}], Content-Type[{}], Accept[{}] finished', resourcePath, method.toUpperCase(), contentTypeHeader, acceptsHeader);
 			}
 		} else {
-			self.logger.error('No suitable resource handler for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type'+contentTypeHeader+', Accept'+acceptsHeader+' found');
+			self.logger.error('No suitable resource handler for resource [' + resourcePath + '], Verb['+method.toUpperCase()+'], Content-Type['+contentTypeHeader+'], Accept['+acceptsHeader+'] found');
 			self.sendError(io.response.BAD_REQUEST, 'Bad Request');
 		}		
   	};
@@ -277,8 +264,8 @@ HttpController.prototype.addResourceHandler = function(sPath, sMethod, fHandler,
 };
 
 HttpController.prototype.sendError = function(httpCode, errMessage) {
-	var request = require("http/request");
-	var response = require("http/response");
+	var request = require("http/v3/request");
+	var response = require("http/v3/response");
 	var contentTypeHeader = this.normalizeMediaTypeHeaderValue(request.getHeader('Accept')) || ['application/json'];
 	var isHtml = ['text/html']
 				.some(function(mediaType){
@@ -301,7 +288,7 @@ HttpController.prototype.sendError = function(httpCode, errMessage) {
 };
 
 HttpController.prototype.closeResponse = function(){
-	var response = require("http/response");
+	var response = require("http/v3/response");
 	response.flush();
 	response.close();
 };
