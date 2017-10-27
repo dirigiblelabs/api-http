@@ -5,11 +5,16 @@
 
 ## Overview
 
-* [HTTP Client API](http://www.dirigible.io/api/http_client.html) - provides utilities for executing HTTP requests
-* [HTTP Request API](http://www.dirigible.io/api/http_request.html) - provides a **HTTP Request Object**, which contains the headers and parameters coming as input from the incoming HTTP request
-* [HTTP Response API](http://www.dirigible.io/api/http_response.html) - provides a **HTTP Response Object**, which sends the result as an outcoming HTTP response
-* [HTTP Session API](http://www.dirigible.io/api/http_session.html) - provides а **HTTP Session Object**, which holds session attributes during multiple client requests
-* [HTTP Upload API](http://www.dirigible.io/api/http_upload.html) - provides capabilities to consume files posted as multipart HTTP request
+* [HTTP Client API](http://www.dirigible.io/api/http_client.html)
+  - provides utilities for executing HTTP requests
+* [HTTP Request API](http://www.dirigible.io/api/http_request.html)
+  - provides a **HTTP Request Object**, which contains the headers and parameters coming as input from the incoming HTTP request
+* [HTTP Response API](http://www.dirigible.io/api/http_response.html)
+  - provides a **HTTP Response Object**, which sends the result as an outcoming HTTP response
+* [HTTP Session API](http://www.dirigible.io/api/http_session.html)
+  - provides а **HTTP Session Object**, which holds session attributes during multiple client requests
+* [HTTP Upload API](http://www.dirigible.io/api/http_upload.html)
+  - provides capabilities to consume files posted as multipart HTTP request
 
 ## License
 
