@@ -107,14 +107,12 @@ var ProtocolHandlerAdapter = function(oDataProtocolApi){
 		
 	this.create = function(oResourceVerbHandler, _this){
 		oResourceVerbHandler.serve(function(context, request, response, handlerDef){
-			/*var input = request.getText();
-		    var entity;
+			var entity;
 			try{
-				entity = JSON.parse(input);
-			} catch (err){
-				throwBadRequestError(context, undefined, undefined, undefined, err);
-			}*/
-			var entity = request.getText();
+				entity = request.getJSON();	
+			} catch(err){
+				throwBadRequestError(context, "Invalid Client Input", undefined, "Invalid JSON in create entity request payload", err);
+			}
 			notify.call(this, 'onEntityInsert', entity, context);
 			var ids = this._dao.insert(entity, context.queryParameters.$cascaded || true);
 			notify.call(this, 'onAfterEntityInsert', entity, ids, context);
@@ -143,14 +141,12 @@ var ProtocolHandlerAdapter = function(oDataProtocolApi){
 	this.update = function(oResourceVerbHandler, _this){
 		oResourceVerbHandler.serve(function(context, request, response){
 			var id = context.pathParameters.id;
-			var entity = request.getText();
-			/*var input = request.getText();
-		    var entity;
+			var entity;
 			try{
-				entity = JSON.parse(input);
+				entity = request.getJSON();
 			} catch (err){
-				throwBadRequestError(context, undefined, undefined, undeifned, err);
-			}*/
+				throwBadRequestError(context, "Invalid Client Input", undefined, "Invalid JSON in update request payload", err);
+			}
 		    //check for potential mismatch in path id and id in input
 		    var entityIdName = this._dao.orm.getPrimaryKey().name;
 		    if(entity[entityIdName]!==null && entity[entityIdName]!==undefined && id !== entity[entityIdName])
@@ -393,9 +389,13 @@ var ProtocolHandlerAdapter = function(oDataProtocolApi){
 				context.httpErrorCode = response.INTERNAL_SERVER_ERROR;
 		    	throw Error('Invalid configuration: missing dao factory in configuration for association \'' + associationName + '\'.');
 		    }
-/*			var input = request.readText();
-			var dependendEntity = JSON.parse(input);*/
-			var dependendEntity = request.readText();
+
+			var dependendEntity;
+			try{
+				dependendEntity= request.getJSON();	
+			} catch(err){
+				throwBadRequestError(context, "Invalid Client Input", undefined, "Invalid JSON in create association request payload", err);
+			}
 			if(this.onEntityInsert){
 			    this.onEntityInsert(dependendEntity);
 			}
