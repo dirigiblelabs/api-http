@@ -140,7 +140,7 @@ var HttpController = exports.HttpController = function(oConfiguration){
 	
 	var catchErrorHandler = function(logctx, ctx, err, request, response){
 		if(ctx.suppressStack){
-			var detailsMsg = ctx.errorName + (ctx.errorCode ? " ["+ctx.errorCode+"]": "") + (ctx.errorMessage ? ": "+ctx.errorMessage : ""); 
+			var detailsMsg = (ctx.errorName || "") + (ctx.errorCode ? " ["+ctx.errorCode+"]": "") + (ctx.errorMessage ? ": "+ctx.errorMessage : ""); 
 			this.logger.info('Serving resource[{}], Verb[{}], Content-Type[{}], Accept[{}] finished in error. {}', logctx.path, logctx.method, logctx.contentType, logctx.accepts, detailsMsg);
 		} else
 			this.logger.error('Serving resource['+logctx.path+'], Verb['+logctx.method+'], Content-Type['+logctx.contentType+'], Accept['+logctx.accepts+'] finished in error', err);
@@ -660,7 +660,10 @@ exports.mappings = function(oConfiguration){
  *
  */
 exports.service = function(oMappings){
-	var config = oMappings.configuration();
+	var config;
+	if(oMappings instanceof RestAPI){
+		config = oMappings.configuration();
+	}
 	var controller = new HttpController(config);
 	return controller;
 };
