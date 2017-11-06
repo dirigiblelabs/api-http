@@ -10,7 +10,7 @@
 
 /* eslint-env node, dirigible */
 var rs = require('http/v3/rs');
-var DAO = require('db/v3/dao').DAO;
+var daos = require('db/v3/dao');
 
 var RestAPI = rs.RestAPI;
 
@@ -80,7 +80,7 @@ var ProtocolHandlerAdapter = function(oDataProtocolApi){
 	//functions deifned on the api prototype will be weaved in the using class
 	this.api = function(){
 		this.dao = function(orm){
-			this._dao = new DAO(orm);
+			this._dao = daos.create(orm);
 			return this;
 		};
 	};	
@@ -506,7 +506,7 @@ DataService.prototype.disableMethods = function(){
  * @param {Object} [oDataProtocolDefinition]  oDataProtocolDefinition supplies the callback functions for each protocol method (e.g. query). Defaults to a new DataProtocolDefinition instance 
  * @returns {DataService} 
  */
-exports.api = function(oConfig, oProtocolHandlersAdapter, oDataProtocolDefinition){
+exports.builder = function(oConfig, oProtocolHandlersAdapter, oDataProtocolDefinition){
 	var ds = new DataService(oConfig, oProtocolHandlersAdapter);
 	return ds;
 };
