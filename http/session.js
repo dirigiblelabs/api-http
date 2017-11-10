@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var session = require('http/v3/session');
 for(var propertyName in session) {
 	exports[propertyName] = session[propertyName];
