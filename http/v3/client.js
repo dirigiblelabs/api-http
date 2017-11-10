@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var java = require('core/v3/java');
 
 request = function(url, method, options) {
