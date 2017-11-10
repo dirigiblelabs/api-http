@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 exports.getClient = function() {
 	var client = require('http/v3/client');
 	return client;
