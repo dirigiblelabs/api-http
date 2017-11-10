@@ -8,9 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
-
 /**
  * Deep merge for JS objects (typeof o === 'object' is true).
  * Array members are copied as is without changes. That means that array in target object will overwrite a coresponding memeber with the same name in source
