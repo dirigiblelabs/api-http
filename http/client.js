@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var client = require('http/v3/client');
 for(var propertyName in client) {
 	exports[propertyName] = client[propertyName];
