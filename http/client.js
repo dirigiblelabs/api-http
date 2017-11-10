@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017 SAP and others.
  * All rights reserved. This program and the accompanying materials
