@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var request = require('http/v3/request');
 for(var propertyName in request) {
 	exports[propertyName] = request[propertyName];
