@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var upload = require('http/v3/upload');
 for(var propertyName in upload) {
 	exports[propertyName] = upload[propertyName];
