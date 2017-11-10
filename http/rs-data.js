@@ -8,8 +8,6 @@
  * SAP - initial API and implementation
  */
 
-/* eslint-env node, dirigible */
-
 var restData = require('http/v3/rs-data');
 for(var propertyName in restData) {
 	exports[propertyName] = restData[propertyName];
