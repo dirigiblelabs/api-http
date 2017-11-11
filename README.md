@@ -10,7 +10,7 @@
 * [HTTP REST Services API](http://www.dirigible.io/api/http_rs.html)
   - provides capabilities to construct and run RESTful services
 * [HTTP REST Data Services API](http://www.dirigible.io/api/http_rs-data.html)
-  - provides capabilities to construct and run RESTful Data-oriented services
+  - provides capabilities to construct and run RESTful data-oriented services
 * [HTTP Request API](http://www.dirigible.io/api/http_request.html)
   - provides a **HTTP Request Object**, which contains the headers and parameters coming as input from the incoming HTTP request
 * [HTTP Response API](http://www.dirigible.io/api/http_response.html)
