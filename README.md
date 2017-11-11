@@ -8,9 +8,9 @@
 * [HTTP Client API](http://www.dirigible.io/api/http_client.html)
   - provides utilities for executing HTTP requests
 * [HTTP REST Services API](http://www.dirigible.io/api/http_rs.html)
-  - provides capabilities to construct and run RESTful services
+  - provides capabilities to construct RESTful services and serve HTTP requests
 * [HTTP REST Data Services API](http://www.dirigible.io/api/http_rs-data.html)
-  - provides capabilities to construct and run RESTful data-oriented services
+  - provides capabilities to construct RESTful data-oriented services and serve HTTP requests
 * [HTTP Request API](http://www.dirigible.io/api/http_request.html)
   - provides a **HTTP Request Object**, which contains the headers and parameters coming as input from the incoming HTTP request
 * [HTTP Response API](http://www.dirigible.io/api/http_response.html)
