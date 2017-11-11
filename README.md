@@ -15,6 +15,10 @@
   - provides а **HTTP Session Object**, which holds session attributes during multiple client requests
 * [HTTP Upload API](http://www.dirigible.io/api/http_upload.html)
   - provides capabilities to consume files posted as multipart HTTP request
+* [HTTP REST Services API](http://www.dirigible.io/api/http_rs.html)
+  - provides capabilities to construct and run RESTful services
+* [HTTP REST Data Services API](http://www.dirigible.io/api/http_rs-data.html)
+  - provides capabilities to construct and run RESTful Data-oriented services
 
 ## License
 
