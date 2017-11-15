@@ -8,10 +8,28 @@
  * SAP - initial API and implementation
  */
 
+
+/**
+ * @module http/v3/rs
+ * @example
+ * ```js
+ * var rs = require("http/v3/rs")
+ * ```
+ */
+
 /************************************
  *   ResourceMappings builder API   *
  ************************************/
 
+/**
+ * Compares two arrays for equality by inspecting if they are arrays, refer to the same instance, 
+ * have same length and contain equal components in the same order. 
+ * 
+ * @param {array} source The source array to compare to 
+ * @param {array} target The target array to compare with
+ * @return {Boolean} true if the arrays are equal, false otherwise
+ * @private
+ */
 var arrayEquals = function(source, target){
 	if(source===target)
 		return true;
@@ -27,23 +45,33 @@ var arrayEquals = function(source, target){
 }
 
 /**
- * Commmon function for initializng the callback functions in the resource method handler specification
+ * Commmon function for initializng the callback functions in the ResourceMethod instances.
+ * 
+ * @param {String} sHandlerFuncName The name of the function that will be attached to the resource mappings configuration
+ * @param {Function} fHandler The handler function that will be attached to the resource mappings configuration
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function is bound.
+ * @private
  */
-var handlerFunction = function(sHandlerFuncName, fHandler, sHandlerCfgName){
+var handlerFunction = function(sHandlerFuncName, fHandler){
 	if(fHandler !== undefined){
 		if(typeof fHandler !== 'function'){
 			throw Error('Invalid argument: ' + sHandlerFuncName + ' method argument must be valid javascript function, but instead is ' + (typeof fHandler));
 		}
-		if(!sHandlerCfgName)
-			sHandlerCfgName = sHandlerFuncName;
-		this.configuration()[sHandlerCfgName] = fHandler;
+		this.configuration()[sHandlerFuncName] = fHandler;
 	}
 	
 	return this;
 };
 
 /**
- * Commmon function for initializng the 'consumes' and 'produces' arrays in the resource method handler specification
+ * Commmon function for initializng the 'consumes' and 'produces' arrays in the ResourceMethod instances.
+ * Before finalizing the configuration setup the function will remove duplicates with exact match filtering. 
+ * 
+ * @param {String} mimeSettingName must be either 'consumes' or 'produces' depending on 
+ * 				   which configuraiton property is being set with this method.
+ * @param {String[]} mimeTypes An array of strings formatted as mime types (type/subtype)
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function is bound.
+ * @private
  */
 var mimeSetting = function(mimeSettingName, mimeTypes){
 	
@@ -82,8 +110,58 @@ var mimeSetting = function(mimeSettingName, mimeTypes){
 
 /**
  * Constructor function for ResourceMethod instances. 
+ * All parameters of the funciton are optional. 
  * 
+ * Providing oConfiguration will initialize this instance with some configuration so the setup does not start 
+ * entirely from scratch. Note that the configuration object schema must be compliant with the one produced by
+ * the ResourceMethod itself. If this parameter is mited, setup will start from scratch.
+ * 
+ * Provisioning controller, will inject a reference ot the execute method of the controller so that it can be 
+ * fluently invoked in the scope of this ResourceMehtod instance as part of the method chaining flow. The function 
+ * is bound to the controller instance for this ResourceMethod. 
+ * 
+ * @example
+ * ```js
+ * rs.service()
+ *  .resource('')
+ * 		.get()
+ * 	.execute();
+ * ```
+ * 
+ * Provisioning resource, will inject a reference ot the HTTP method functions of the Resource class (get, post,
+ * put, delete, remove, method) so that they can be fluently invoked in the scope of this ResourceMethod instance 
+ * as part of the method chaining flow. The functions are bound to the resource instance for this ResourceMethod. 
+ * 
+ * @example
+ * ```js
+ * rs.service()
+ *  .resource('')
+ * 		.get(function(){})
+ * 		.post(function(){})
+ * 		.put(function(){})
+ * 		.remove(function(){})
+ * .execute();
+ * ```
+ * 
+ * Provisioning mappings, will inject a reference ot the resource method of the ResourceMappings class so that 
+ * it can be fluently invoked in the scope of this ResourceMethod instance as part of the method chaining flow. 
+ * The function is bound to the mappings instance for this ResourceMethod. 
+ * 
+ * @example
+ * ```js
+ * rs.service()
+ *  .resource('')
+ * 		.get(function(){})
+ * 	.resource('{id}')
+ * 		.get(function(){})
+ * .execute();
+ * ```
+ * 
+ * @class
  * @param {Object} [oConfiguration]
+ * @param {HttpController} [controller] The controller instance, for which this ResourceMethod handles configuration
+ * @param {Resource} [resource] The resource instance, for which this ResourceMethod handles configuration
+ * @param {ResourceMappings} [mappings] The mappings instance, for which this ResourceMethod handles configuration
  * @returns {ResourceMethod} 
  */
 var ResourceMethod = function(oConfiguration, controller, resource, mappings){
@@ -103,7 +181,7 @@ var ResourceMethod = function(oConfiguration, controller, resource, mappings){
 };
 
 /**
- * Returns the configuration for this resource method handler.
+ * Returns the configuration for this ResourceMethod instance.
  * 
  * @returns {Object} 
  */
@@ -112,11 +190,29 @@ ResourceMethod.prototype.configuration = function(){
 };
 
 /**
- * Defines the MIME types that this resource method handler consumes. Together with the definition of those that it will produce, they constitute
- * the target against which requests with this method will be matched to enact handler specification.
+ * Defines the content MIME type(s), which this ResourceMethod request processing function expects as input from the 
+ * client request, i.e. those that it 'consumes'. At runtime, the Content-Type request header will be matched for 
+ * compatibility with this setting to elicit request processing functions.
+ * Note that the matching is performed by compatibility, not strict equality, i.e. the MIME type format wildcards are
+ * considered too. For example, a request Content-Type header "text\/json" will match a consumes setting "*\/json".
  * 
- * @param {Function} Callback function for the finally phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaning
+ * @example
+ * ```js
+ * rs.service()
+ *	.resource("")
+ * 		.post(function(){})
+ * 			.consumes(["*\/json"])
+ * .execute();
+ * 	.
+ * ```
+ * 
+ * Although it's likely that most implementations will resort to single, or a range of compatible input MIME types, it is 
+ * entirely up to the request processing function implementation. For example it may be capable of processing content with 
+ * various, possibly incompatible MIME types. Take care to make sure that the consumes constraint will constrain the requests
+ * only to those that the request processing function can really process. 
+ * 
+ * @param {String[]} mimeTypes Sets the mime types that this ResourceMethod request processing function is capable to consume.
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 
 ResourceMethod.prototype.consumes = function(mimeTypes){
@@ -124,56 +220,99 @@ ResourceMethod.prototype.consumes = function(mimeTypes){
 };
 
 /**
- * Defines the MIME types that this resource method handler produces. Together with the definition of those that it will consume, they constitute
- * the target against which requests with this method will be matched to enact handler specification.
+ * Defines the HTTP response payload MIME type(s), which this ResourceMethod request processing function outputs, i.e. 
+ * those that it 'produces'. At runtime, the Accept request header will be matched for compatibility with this setting 
+ * to elicit request processing functions.
+ * Note that the matching is performed by compatibility, not strict equality, i.e. the MIME type format wildcards are
+ * considered too. For example, a request Accept header "*\/json" will match a produces setting "application\/json".
  * 
- * A note about method argument multiplicity (stirng vs array of strings). 
- * The argument of the produce method will translate to the response Content-Type property, which is knwon to be a 
- * single value header by [specification](https://tools.ietf.org/html/rfc7231#section-3.1.1.5). However, this method accepts also array of stirngs as argument.
- * The reason is because produces has sligtly different semantics than a value for Content-Type. It is a declaration for the content types of the 
- * response payload that a handler may produce. Though in most cases a handler function will produce payload in single format (media type), it is 
- * quite possible to desgin it also as a controller that procudes alternative payload in different formats. In these cases you need produces that declares
- * all supported media types so that the request with accept header matching any of them can land in this handler. That makes the routing a bit less transparent
- * but may prove valuable for certian cases.
+ * @example
+ * ```js
+ * rs.service()
+ *	.resource("")
+ * 		.get(function(){})
+ * 			.produces(["application\/json"])
+ * .execute();
+ * 	.
+ * ```
  * 
- * @param {Function} Callback function for the finally phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaining
+ * Take care to make sure that the produces constraint correctly describes the response contenty MIME types that the request 
+ * processing function can produce so that only client request that can accept them land there.
+ * 
+ * A note about method argument multiplicity (string vs array of strings). 
+ * One of the arguments of the produce method will translate to the response Content-Type property, which is known to be a 
+ * single value header by [specification](https://tools.ietf.org/html/rfc7231#section-3.1.1.5). There are two reasons why 
+ * the method accepts array and not a single value only:
+ * 
+ * 1. Normally, when matched, content types are evaluated for semantic compatibility and not strict equality on both sides
+ *  - client and server. Providing a range of compatible MIME types instead of single value, increases the range of acceptable 
+ * requests for procesing, while reducing the stricness of the requirements on the client making the request. For example, 
+ * declaring ["text/json,"application/json"] as produced types makes requests with any of these accept headers (or a combination
+ * of them) acceptable for processing: "*\/json", "text/json", "application/json", "*\/*".  
+ * 
+ * 2. Although in most cases a handler function will produce payload in single format (media type), it is quite possible to 
+ * desgin it also as a controller that produces alternative payload in different formats. In these cases you need produces 
+ * that declares all supported media types so that the request with a relaxed Accept header matching any of them can land 
+ * in this function. That makes the routing a bit less transparent and dependent on the client, but may prove valuable for 
+ * certian cases.
+ * 
+ * In any case it is responsibility of the request processing function to set the correct Content-Type header.
+ * 
+ * @param {String[]} mimeTypes Sets the mime type(s) that this ResourceMethod request processing function may produce.
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 ResourceMethod.prototype.produces = function(mimeTypes){
 	return mimeSetting.apply(this, ['produces', mimeTypes]);
 };
 /**
- * Applies a callback function for the before phase of processing a matched resource request.
+ * Applies a callback function for the before phase of processing a matched resource request. If a callback function
+ * is supplied, it is executed right before the serve function. The before function may throw errors, which will move
+ * the processing flow to the catch and then the finally functions (if any). The before function is suitable for processing 
+ * pre-conditions to the serve. They could be euqally well implemented also in the serve function, but using before gives
+ * a chance for clear spearation of concerns in the code and easier to maintain.
+ * 
+ * @example
+ * ```js
+ * rs.service()
+ * 	.resource('')
+ * 		.get(function(){})
+ * 			.before(function(){
+ *				if(request.getHeader('X-developer-key').value()===null)
+ * 					this.controller.sendError(response.FORBIDDEN, undefined, response.HttpCodeReason.getReason(response.FORBIDDEN), "X-developer-key is missing from request headers"); 
+ *			})
+ *	.execute();
+ * ```
  * 
  * @param {Function} Callback function for the before phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaning
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 ResourceMethod.prototype.before = function(fHandler){
-	return handlerFunction.apply(this, ['before', fHandler, 'before']);
+	return handlerFunction.apply(this, ['before', fHandler]);
 };
 /**
- * Applies a callback function for the serve phase of processing a matched resource request. Mandatory for valid resource handling specifications.
+ * Applies a callback function for processing a matched resource request. Mandatory for valid resource handling specifications.
  * 
  * @param {Function} Callback function for the serve phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaning
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 ResourceMethod.prototype.serve = function(fHandler){
-	return handlerFunction.apply(this, ['serve', fHandler, 'serve']);
+	return handlerFunction.apply(this, ['serve', fHandler]);
 };
 /**
  * Applies a callback function for the catch errors phase of processing a matched resource request.
  * 
  * @param {Function} Callback function for the catch errors phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaning
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 ResourceMethod.prototype.catch = function(fHandler){
 	return handlerFunction.apply(this, ['catch', fHandler]);
 };
 /**
- * Applies a callback function for the finally phase of processing a matched resource request.
+ * Applies a callback function for the finally phase of processing a matched resource request. This function (if supplied) is always invoked
+ * regardles if the request processing yielded error or not.
  * 
  * @param {Function} Callback function for the finally phase of procesing matched resource requests
- * @returns {ResourceMethod} the method handler instance for method chaning
+ * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 ResourceMethod.prototype.finally = function(fHandler){
 	return handlerFunction.apply(this, ['finally', fHandler]);
@@ -207,9 +346,12 @@ var Resource = function(sPath, oConfiguration, controller, mappings){
 };
 
 /**
- * Sets the URL path for this resource, overriding the one specified upon its construction.
+ * Sets the URL path for this resource, overriding the one specified upon its construction, 
+ * if a path string is provided as argument ot the method (i.e. acts as setter), 
+ * or returns the path set for this resource, if the method is invoked without arguments (i.e. acts as getter).
  * 
- * @returns {Resource} the resource instance for method chaining
+ * @param {string} [sPath] the path property to be set for this resource
+ * @returns {Resource|string} the resource instance for method chaining, or the path set for this resource
  */
 Resource.prototype.path = function(sPath){
 	if(arguments.length === 0)
@@ -224,8 +366,8 @@ Resource.prototype.path = function(sPath){
  * the method handlers before manually setting up specifications and to setup multiple handler specifications in one call.
  * 
  * @param {String} sHttpMethod - the HTTP method (method)
- * @param {Object|Array} oConfiguration - the handler specification(s) for this HTTP method. Can be a single object or array.
- * @returns {ResourceMethod|Array} 
+ * @param {Object|Object[]} oConfiguration - the handler specification(s) for this HTTP method. Can be a single object or array.
+ * @returns {ResourceMethod|Object[]} 
  */
 Resource.prototype.method = Resource.prototype.method = function(sHttpMethod, oConfiguration){
 	if(sHttpMethod===undefined)
@@ -386,10 +528,15 @@ Resource.prototype.readonly = function(){
  *   ResourceMappings API   *
  ****************************/
 
+
 /**
  * Constructor function for ResourceMappings instances.
  * 
+ * @class
  * @param {Object} [oConfiguration]
+ * @param {HttpController} [controller] The controller instance, for which this ResourceMappings handles configuration
+ * @returns {ResourceMappings} 
+ * @static
  */
 var ResourceMappings = exports.ResourceMappings = function(oConfiguration, controller){
 	this.resources = {};
@@ -473,7 +620,9 @@ ResourceMappings.prototype.find = function(sPath, sVerb, arrConsumes, arrProduce
 /**
  * Constructor function for HttpController instances.
  * 
+ * @class
  * @param {ResourceMappings|Object} [oMappings] the mappings configuration for this controller.
+ * 
  */
 var HttpController = exports.HttpController = function(oMappings){
 	this.logger = require('log/logging').getLogger('http.rs.controller');
@@ -744,7 +893,7 @@ HttpController.prototype.closeResponse = function(){
  ****************************/
 
 /**
- * Creates a service, optionally initialized wiht oMappings
+ * Creates a service, optionally initialized with oMappings
  * 
  * @param {Object|ResourceMappings} [oMappings] configuration object or configuration builder with configuration() getter function
  *
