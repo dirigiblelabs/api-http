@@ -884,7 +884,7 @@ HttpController.prototype.sendError = function(httpErrorCode, applicationErrorCod
 	var request = require("http/v3/request");
 	var clientAcceptMediaTypes = this.normalizeMediaTypeHeaderValue(request.getHeader('Accept')) || ['application/json'];
 	var isHtml = clientAcceptMediaTypes.some(function(acceptMediaType){
-					return this.isMimeTypeCompatible( 'html', acceptMediaType);
+					return this.isMimeTypeCompatible( '*/html', acceptMediaType);
 				}.bind(this));
 	var response = require("http/v3/response");				
 	response.setStatus(httpErrorCode || response.INTERNAL_SERVER_ERROR);
