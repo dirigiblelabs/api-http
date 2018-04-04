@@ -711,9 +711,9 @@ var HttpController = exports.HttpController = function(oMappings){
 			return true;
 		var targetM = target.split('/');
 		var sourceM = source.split('/');
-		if(targetM[0] === '*' && targetM[1] === sourceM[1])
+		if((targetM[0] === '*' && targetM[1] === sourceM[1]) || (source[0] === '*' && targetM[1] === sourceM[1]) )
 			return true;
-		if(targetM[1] === '*' && targetM[0] === sourceM[0])
+		if((targetM[1] === '*' && targetM[0] === sourceM[0]) || (sourceM[1] === '*' && targetM[0] === sourceM[0]))
 			return true;		
 	};
 	
