@@ -48,7 +48,7 @@ exports.trace = function(url, options) {
 };
 
 function buildUrl(url, options) {
-	if (options.params === undefined || options.params === null || options.params.length === 0) {
+	if (options === undefined || options === null || options.params === undefined || options.params === null || options.params.length === 0) {
 		return url;
 	}
 	for (var i = 0; i < options.params.length; i ++) {
