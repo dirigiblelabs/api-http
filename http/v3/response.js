@@ -271,26 +271,14 @@ exports.setLocale = function(language, country, variant) {
 	
 exports.getHeaders = function(name) {
 	var headersJson;
-	if (__engine === 'rhino') {
-		headersJson = org.eclipse.dirigible.api.v3.http.HttpResponseFacade.getHeaders(name);
-	} else if (__engine === 'nashorn') {
-		headersJson = Packages.org.eclipse.dirigible.api.v3.http.HttpResponseFacade.getHeaders(name);
-	} else {
-		headersJson = java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'getHeaders', [name]);
-	}
+	headersJson = java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'getHeaders', [name]);
 	var headers = JSON.parse(headersJson);
 	return headers;
 };
 
 exports.getHeaderNames = function() {
 	var headerNamesJson;
-	if (__engine === 'rhino') {
-		headerNamesJson = org.eclipse.dirigible.api.v3.http.HttpResponseFacade.getHeaderNames();
-	} else if (__engine === 'nashorn') {
-		headerNamesJson = Packages.org.eclipse.dirigible.api.v3.http.HttpResponseFacade.getHeaderNames();
-	} else {
-		headerNamesJson = java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'getHeaderNames', []);
-	}
+	headerNamesJson = java.call('org.eclipse.dirigible.api.v3.http.HttpResponseFacade', 'getHeaderNames', []);
 	var headerNames = JSON.parse(headerNamesJson);
 	return headerNames;
 };
