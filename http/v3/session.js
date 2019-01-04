@@ -34,13 +34,7 @@ exports.getAttribute = function(name) {
 
 exports.getAttributeNames = function() {
 	var attrNames;
-	if (__engine === 'rhino') {
-		attrNames = org.eclipse.dirigible.api.v3.http.HttpSessionFacade.getAttributeNames();
-	} else if (__engine === 'nashorn') {
-		attrNames = Packages.org.eclipse.dirigible.api.v3.http.HttpSessionFacade.getAttributeNames();
-	} else {
-		attrNames = java.call('org.eclipse.dirigible.api.v3.http.HttpSessionFacade', 'getAttributeNames', []);
-	}
+	attrNames = java.call('org.eclipse.dirigible.api.v3.http.HttpSessionFacade', 'getAttributeNames', []);
 	if (attrNames) {
 		return JSON.parse(attrNames);
 	}
