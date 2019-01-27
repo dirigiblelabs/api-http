@@ -1,11 +1,14 @@
 function createSuccessCallback(callback) {
 	return "(function(httpResponse) {\n"
-		+ "var inputStream = httpResponse.getEntity().getContent();\n"
-		+ "var content = org.apache.commons.io.IOUtils.toString(inputStream);\n"
 		+ "var response = {};\n"
 		+ "response.statusCode = httpResponse.getStatusLine().getStatusCode();\n"
 		+ "response.headers = httpResponse.getAllHeaders();\n"
+		+ "var entity = httpResponse.getEntity();\n"
+		+ "if (entity) {\n"
+		+ "var inputStream = entity.getContent();\n"
+		+ "var content = org.apache.commons.io.IOUtils.toString(inputStream);\n"
 		+ "response.data = content;\n"
+		+ "}\n"
 		+ "(" + callback + ")(response);\n"
 		+ "})(__context.get('response'));\n";
 }
@@ -34,14 +37,88 @@ function HttpAsyncClient() {
 	
 	this.httpClient = new org.eclipse.dirigible.engine.js.rhino.api.v3.http.HttpClientAsync();
 
-	this.getAsync = function(url, config) {
+	this.getAsync = function(url, config, options) {
 		var callback = createHttpResponseCallback(
 			this.httpClient,
 			config.success,
 			config.error,
 			config.cancel
 		);
-		this.httpClient.getAsync(url, null, callback);
+		if (options) {
+			this.httpClient.getAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.getAsync(url, JSON.stringify({}), callback);
+		}
+	};
+
+	this.postAsync = function(url, config, options) {
+		var callback = createHttpResponseCallback(
+			this.httpClient,
+			config.success,
+			config.error,
+			config.cancel
+		);
+		if (options) {
+			this.httpClient.postAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.postAsync(url, JSON.stringify({}), callback);
+		}
+	};
+
+	this.putAsync = function(url, config, options) {
+		var callback = createHttpResponseCallback(
+			this.httpClient,
+			config.success,
+			config.error,
+			config.cancel
+		);
+		if (options) {
+			this.httpClient.putAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.putAsync(url, JSON.stringify({}), callback);
+		}
+	};
+
+	this.deleteAsync = function(url, config, options) {
+		var callback = createHttpResponseCallback(
+			this.httpClient,
+			config.success,
+			config.error,
+			config.cancel
+		);
+		if (options) {
+			this.httpClient.deleteAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.deleteAsync(url, JSON.stringify({}), callback);
+		}
+	};
+
+	this.headAsync = function(url, config, options) {
+		var callback = createHttpResponseCallback(
+			this.httpClient,
+			config.success,
+			config.error,
+			config.cancel
+		);
+		if (options) {
+			this.httpClient.headAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.headAsync(url, JSON.stringify({}), callback);
+		}
+	};
+
+	this.traceAsync = function(url, config, options) {
+		var callback = createHttpResponseCallback(
+			this.httpClient,
+			config.success,
+			config.error,
+			config.cancel
+		);
+		if (options) {
+			this.httpClient.traceAsync(url, JSON.stringify(options), callback);
+		} else {
+			this.httpClient.traceAsync(url, JSON.stringify({}), callback);
+		}
 	};
 
 	this.execute = function() {
