@@ -1,16 +1,32 @@
 function createSuccessCallback(callback) {
-	return "(function(httpResponse) {\n"
+	return "(function(httpResponse, isBinary) {\n"
 		+ "var response = {};\n"
 		+ "response.statusCode = httpResponse.getStatusLine().getStatusCode();\n"
-		+ "response.headers = httpResponse.getAllHeaders();\n"
+		+ "response.statusMessage = httpResponse.getStatusLine().getReasonPhrase();\n"
+		+ "response.protocol = httpResponse.getProtocolVersion();\n"
+		+ "response.binary = isBinary;\n"
+
+		+ "var headers = httpResponse.getAllHeaders();\n"
+		+ "response.headers = [];\n"
+		+ "for (var i = 0; i < headers.length; i ++) {\n"
+		+ "    response.headers.push({\n"
+		+ "        name: headers[i].getName(),\n"
+		+ "        value: headers[i].getValue()\n"
+		+ "    });\n"
+		+ "}\n"
+
 		+ "var entity = httpResponse.getEntity();\n"
 		+ "if (entity) {\n"
-		+ "var inputStream = entity.getContent();\n"
-		+ "var content = org.apache.commons.io.IOUtils.toString(inputStream);\n"
-		+ "response.data = content;\n"
+		+ "    var inputStream = entity.getContent();\n"
+		+ "    if (isBinary) {\n"
+		+ "        response.data = org.apache.commons.io.IOUtils.toByteArray(inputStream);\n"
+		+ "    } else {\n"
+		+ "        response.text = org.apache.commons.io.IOUtils.toString(inputStream);\n"
+		+ "    }\n"
 		+ "}\n"
+
 		+ "(" + callback + ")(response);\n"
-		+ "})(__context.get('response'));\n";
+		+ "})(__context.get('response'), __context.get('httpClientRequestOptions').isBinary());\n";
 }
 
 function createErrorCallback(callback) {
