@@ -11,6 +11,8 @@
 
 var streams = require("io/v4/streams");
 
+let jsonData = null;
+
 exports.isValid = function() {
 	return org.eclipse.dirigible.api.v3.http.HttpRequestFacade.isValid();
 };
@@ -92,11 +94,12 @@ var getText = exports.getText = function() {
 };
 
 exports.getJSON = function() {
-	var text = getText();
-	var json = JSON.parse(text);
-	return json;
+	if (jsonData === null) {
+		let text = getText();
+		jsonData = JSON.parse(text);
+	}
+	return jsonData;
 };
-
 
 exports.getParameter = function(name) {
 	return org.eclipse.dirigible.api.v3.http.HttpRequestFacade.getParameter(name);
