@@ -276,6 +276,7 @@ declare module "@dirigible/http" {
              * @param oResponse
              */
             execute(oRequest?, oResponse?);
+            resource(oConfiguration?):Resource;
         }
 
         interface ResourceMappings {
@@ -327,32 +328,32 @@ declare module "@dirigible/http" {
              * Returns the get method configuration object, optionally configured with fServeCallback for serving requests
              * @param fServeCallback
              */
-            get(fServeCallback?): ResourceMethod;
+            get(fServeCallback?):  Resource;
 
             /**
              * Returns the post method configuration object, optionally configured with fServeCallback for serving requests
              * @param fServeCallback
              */
 
-            post(fServeCallback?): ResourceMethod;
+            post(fServeCallback?): Resource;
 
             /**
              * Returns the put method configuration object, optionally configured with fServeCallback for serving requests
              * @param fServeCallback
              */
-            put(fServeCallback?): ResourceMethod;
+            put(fServeCallback?):  Resource;
 
             /**
              * Returns the delete method configuration object, optionally configured with fServeCallback for serving requests
              * @param fServeCallback
              */
-            delete(fServeCallback?): ResourceMethod;
+            delete(fServeCallback?):  Resource;
 
             /**
              * Returns the delete method configuration object, optionally configured with fServeCallback for serving requests
              * @param fServeCallback
              */
-            remove(fServeCallback?): ResourceMethod;
+            remove(fServeCallback?):  Resource;
 
             /**
              * Returns the a method configuration object for the sHttpVerb HTTP method name and optionally initialized with oConfiguration object
@@ -451,6 +452,7 @@ declare module "@dirigible/http" {
          * @param oMappings
          */
         function service(oMappings?): HttpController;
+
     }
     /**
      * Client is used by scripting services to call external services via HTTP.
