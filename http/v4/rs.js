@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2021 SAP SE or an SAP affiliate company and Eclipse Dirigible contributors
+ * Copyright (c) 2022 SAP SE or an SAP affiliate company and Eclipse Dirigible contributors
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v20.html
  *
- * SPDX-FileCopyrightText: 2021 SAP SE or an SAP affiliate company and Eclipse Dirigible contributors
+ * SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Eclipse Dirigible contributors
  * SPDX-License-Identifier: EPL-2.0
  */
 /**
@@ -30,17 +30,19 @@
  * @return {Boolean} true if the arrays are equal, false otherwise
  * @private
  */
-var arrayEquals = function(source, target){
-	if(source===target)
+const { match } = require("/webjars/path-to-regexp/6.2.1/dist/index.js");
+
+var arrayEquals = function (source, target) {
+	if (source === target)
 		return true;
-	if(!Array.isArray(source) || !Array.isArray(source))
+	if (!Array.isArray(source) || !Array.isArray(source))
 		return false;
-	if(source!==undefined && target===undefined || source===undefined && target!==undefined)
+	if (source !== undefined && target === undefined || source === undefined && target !== undefined)
 		return false;
-	if(source.length !== target.length)
+	if (source.length !== target.length)
 		return false;
-	for(var i=0; i<source.length; i++){
-		if(source[i]!==target[i])
+	for (var i = 0; i < source.length; i++) {
+		if (source[i] !== target[i])
 			return false;
 	}
 	return true;
@@ -54,9 +56,9 @@ var arrayEquals = function(source, target){
  * @returns {ResourceMethod} The ResourceMethod instance to which the function is bound.
  * @private
  */
-var handlerFunction = function(sHandlerFuncName, fHandler){
-	if(fHandler !== undefined){
-		if(typeof fHandler !== 'function'){
+var handlerFunction = function (sHandlerFuncName, fHandler) {
+	if (fHandler !== undefined) {
+		if (typeof fHandler !== 'function') {
 			throw Error('Invalid argument: ' + sHandlerFuncName + ' method argument must be valid javascript function, but instead is ' + (typeof fHandler));
 		}
 		this.configuration()[sHandlerFuncName] = fHandler;
@@ -75,26 +77,26 @@ var handlerFunction = function(sHandlerFuncName, fHandler){
  * @returns {ResourceMethod} The ResourceMethod instance to which the function is bound.
  * @private
  */
-var mimeSetting = function(mimeSettingName, mimeTypes){
+var mimeSetting = function (mimeSettingName, mimeTypes) {
 
-	if(mimeTypes !== undefined){
-		if(typeof mimeTypes === 'string'){
+	if (mimeTypes !== undefined) {
+		if (typeof mimeTypes === 'string') {
 			mimeTypes = [mimeTypes];
-		} else if(!Array.isArray(mimeTypes)){
-			throw Error('Invalid argument: '+mimeSettingName+' mime type argument must be valid MIME type string or array of such strings, but instead is ' + (typeof mimeTypes));
+		} else if (!Array.isArray(mimeTypes)) {
+			throw Error('Invalid argument: ' + mimeSettingName + ' mime type argument must be valid MIME type string or array of such strings, but instead is ' + (typeof mimeTypes));
 		}
 
-		mimeTypes.forEach(function(mimeType){
+		mimeTypes.forEach(function (mimeType) {
 			const mt = mimeType.split('/');
-			if(mt === null || mt.length < 2)
-				throw Error('Invalid argument. Not a valid MIME type format type/subtype: '+mimeType);
+			if (mt === null || mt.length < 2)
+				throw Error('Invalid argument. Not a valid MIME type format type/subtype: ' + mimeType);
 			//TODO: stricter checks
 		});
 
-		if(!this.configuration()[mimeSettingName])
+		if (!this.configuration()[mimeSettingName])
 			this.configuration()[mimeSettingName] = [];
 		//deduplicate entries
-		mimeTypes = mimeTypes.filter(function(mimeType){
+		mimeTypes = mimeTypes.filter(function (mimeType) {
 			return this.configuration()[mimeSettingName].indexOf(mimeType) < 0;
 		}.bind(this));
 
@@ -166,18 +168,18 @@ var mimeSetting = function(mimeSettingName, mimeTypes){
  * @param {ResourceMappings} [mappings] The mappings instance, for which this ResourceMethod handles configuration
  * @returns {ResourceMethod}
  */
-var ResourceMethod = function(oConfiguration, controller, resource, mappings){
+var ResourceMethod = function (oConfiguration, controller, resource, mappings) {
 	this.cfg = oConfiguration;
 	this._resource = resource;
-	if(controller)
+	if (controller)
 		this.execute = controller.execute.bind(controller);
-	if(resource){
-		['get','post','put','delete','remove','method'].forEach(function(methodName){
-			if(this._resource[methodName])
+	if (resource) {
+		['get', 'post', 'put', 'delete', 'remove', 'method'].forEach(function (methodName) {
+			if (this._resource[methodName])
 				this[methodName] = this._resource[methodName].bind(this._resource);
 		}.bind(this));
 	}
-	if(mappings){
+	if (mappings) {
 		this.resource = mappings.resource.bind(mappings);
 		this.resourcePath = this.path = this.resource;//aliases
 	}
@@ -189,7 +191,7 @@ var ResourceMethod = function(oConfiguration, controller, resource, mappings){
  *
  * @returns {Object}
  */
-ResourceMethod.prototype.configuration = function(){
+ResourceMethod.prototype.configuration = function () {
 	return this.cfg;
 };
 
@@ -219,7 +221,7 @@ ResourceMethod.prototype.configuration = function(){
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
 
-ResourceMethod.prototype.consumes = function(mimeTypes){
+ResourceMethod.prototype.consumes = function (mimeTypes) {
 	return mimeSetting.apply(this, ['consumes', mimeTypes]);
 };
 
@@ -265,7 +267,7 @@ ResourceMethod.prototype.consumes = function(mimeTypes){
  * @param {String[]} mimeTypes Sets the mime type(s) that this ResourceMethod request processing function may produce.
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
-ResourceMethod.prototype.produces = function(mimeTypes){
+ResourceMethod.prototype.produces = function (mimeTypes) {
 	return mimeSetting.apply(this, ['produces', mimeTypes]);
 };
 /**
@@ -290,7 +292,7 @@ ResourceMethod.prototype.produces = function(mimeTypes){
  * @param {Function} Callback function for the before phase of procesing matched resource requests
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
-ResourceMethod.prototype.before = function(fHandler){
+ResourceMethod.prototype.before = function (fHandler) {
 	return handlerFunction.apply(this, ['before', fHandler]);
 };
 /**
@@ -299,7 +301,7 @@ ResourceMethod.prototype.before = function(fHandler){
  * @param {Function} Callback function for the serve phase of procesing matched resource requests
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
-ResourceMethod.prototype.serve = function(fHandler){
+ResourceMethod.prototype.serve = function (fHandler) {
 	return handlerFunction.apply(this, ['serve', fHandler]);
 };
 /**
@@ -308,7 +310,7 @@ ResourceMethod.prototype.serve = function(fHandler){
  * @param {Function} Callback function for the catch errors phase of procesing matched resource requests
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
-ResourceMethod.prototype.catch = function(fHandler){
+ResourceMethod.prototype.catch = function (fHandler) {
 	return handlerFunction.apply(this, ['catch', fHandler]);
 };
 /**
@@ -318,7 +320,7 @@ ResourceMethod.prototype.catch = function(fHandler){
  * @param {Function} Callback function for the finally phase of procesing matched resource requests
  * @returns {ResourceMethod} The ResourceMethod instance to which the function invocation is bound, for mehtod chaining.
  */
-ResourceMethod.prototype.finally = function(fHandler){
+ResourceMethod.prototype.finally = function (fHandler) {
 	return handlerFunction.apply(this, ['finally', fHandler]);
 };
 
@@ -336,14 +338,14 @@ ResourceMethod.prototype.finally = function(fHandler){
  * @param {Object} [oConfiguration]
  * @returns {Resource} the resource instance for method chaining
  */
-var Resource = function(sPath, oConfiguration, controller, mappings){
+var Resource = function (sPath, oConfiguration, controller, mappings) {
 	this.sPath = sPath;
 	this.cfg = oConfiguration || {};
-	if(controller){
+	if (controller) {
 		this.controller = controller;
 		this.execute = controller.execute.bind(controller);
 	}
-	if(mappings){
+	if (mappings) {
 		this.mappings = mappings;
 	}
 	return this;
@@ -357,8 +359,8 @@ var Resource = function(sPath, oConfiguration, controller, mappings){
  * @param {string} [sPath] the path property to be set for this resource
  * @returns {Resource|string} the resource instance for method chaining, or the path set for this resource
  */
-Resource.prototype.path = function(sPath){
-	if(arguments.length === 0)
+Resource.prototype.path = function (sPath) {
+	if (arguments.length === 0)
 		return this.sPath;
 	this.sPath = sPath;
 	return this;
@@ -373,28 +375,28 @@ Resource.prototype.path = function(sPath){
  * @param {Object|Object[]} oConfiguration - the handler specification(s) for this HTTP method. Can be a single object or array.
  * @returns {ResourceMethod|Object[]}
  */
-Resource.prototype.method = function(sHttpMethod, oConfiguration){
-	if(sHttpMethod===undefined)
+Resource.prototype.method = function (sHttpMethod, oConfiguration) {
+	if (sHttpMethod === undefined)
 		throw new Error('Illegal sHttpMethod argument: ' + sHttpMethod);
 
 	const method = sHttpMethod.toLowerCase();
 
-	if(!this.cfg[method])
+	if (!this.cfg[method])
 		this.cfg[method] = [];
 
 	let arrConfig = oConfiguration || {};
-	if(!Array.isArray(arrConfig)){
+	if (!Array.isArray(arrConfig)) {
 		arrConfig = [arrConfig];
 	}
 	const handlers = [];
-	arrConfig.forEach(function(handlerSpec){
+	arrConfig.forEach(function (handlerSpec) {
 		var _h = this.find(sHttpMethod, handlerSpec.consumes, handlerSpec.produces);
-		if(!_h) {
+		if (!_h) {
 			//create new
 			this.cfg[method].push(handlerSpec);
 		} else {
 			//update
-			for(var propName in handlerSpec)
+			for (var propName in handlerSpec)
 				_h[propName] = handlerSpec[propName];
 		}
 		handlers.push(new ResourceMethod(handlerSpec, this.controller, this, this.mappings));
@@ -404,11 +406,11 @@ Resource.prototype.method = function(sHttpMethod, oConfiguration){
 
 };
 
-var buildMethod = function(sMethodName, args){
-	if(args.length>0){
-		if(typeof args[0] === 'function')
+var buildMethod = function (sMethodName, args) {
+	if (args.length > 0) {
+		if (typeof args[0] === 'function')
 			return this.method(sMethodName).serve(args[0]);
-		else if(typeof args[0] === 'object')
+		else if (typeof args[0] === 'object')
 			return this.method(sMethodName, args[0]);
 		else
 			throw Error('Invalid argument: Resource.' + sMethodName + ' method first argument must be valid javascript function or configuration object, but instead is ' + (typeof args[0]) + ' ' + args[0]);
@@ -425,7 +427,7 @@ var buildMethod = function(sMethodName, args){
  *
  * @param {Function|Object} [fServeCb|oConfiguration] serve function callback or oConfiguraiton to initilaize the method
  */
-Resource.prototype.get = function(){
+Resource.prototype.get = function () {
 	return buildMethod.call(this, 'get', arguments);
 };
 /**
@@ -435,7 +437,7 @@ Resource.prototype.get = function(){
  *
  * @param {Function|Object} [fServeCb|oConfiguration] serve function callback or oConfiguraiton to initilaize the method
  */
-Resource.prototype.post = function(){
+Resource.prototype.post = function () {
 	return buildMethod.call(this, 'post', arguments);
 };
 /**
@@ -445,7 +447,7 @@ Resource.prototype.post = function(){
  *
  * @param {Function|Object} [fServeCb|oConfiguration] serve function callback or oConfiguraiton to initilaize the method
  */
-Resource.prototype.put = function(){
+Resource.prototype.put = function () {
 	return buildMethod.call(this, 'put', arguments);
 };
 /**
@@ -455,7 +457,7 @@ Resource.prototype.put = function(){
  *
  * @param {Function|Object} [fServeCb|oConfiguration] serve function callback or oConfiguraiton to initilaize the method
  */
-Resource.prototype["delete"] = Resource.prototype.remove = function(){
+Resource.prototype["delete"] = Resource.prototype.remove = function () {
 	return buildMethod.call(this, 'delete', arguments);
 };
 
@@ -466,18 +468,18 @@ Resource.prototype["delete"] = Resource.prototype.remove = function(){
  * @param {Array} arrConsumesMimeTypeStrings the consumes constraint property of the ResourceMethod in search
  * @param {Array} arrProducesMimeTypeStrings the produces constraint property of the ResourceMethod in search
  */
-Resource.prototype.find = function(sVerb, arrConsumesMimeTypeStrings, arrProducesMimeTypeStrings){
+Resource.prototype.find = function (sVerb, arrConsumesMimeTypeStrings, arrProducesMimeTypeStrings) {
 	let hit;
-	Object.keys(this.cfg).filter(function(sVerbName){
-		return sVerb === undefined || (sVerb!==undefined && sVerb === sVerbName);
-	}).forEach(function(sVerbName){
-		this.cfg[sVerbName].forEach(function(verbHandlerSpec){
-			if(arrayEquals(verbHandlerSpec.consumes, arrConsumesMimeTypeStrings) && arrayEquals(verbHandlerSpec.produces, arrProducesMimeTypeStrings)){
-				hit  =  new ResourceMethod(verbHandlerSpec, this.controller, this, this.mappings);
+	Object.keys(this.cfg).filter(function (sVerbName) {
+		return sVerb === undefined || (sVerb !== undefined && sVerb === sVerbName);
+	}).forEach(function (sVerbName) {
+		this.cfg[sVerbName].forEach(function (verbHandlerSpec) {
+			if (arrayEquals(verbHandlerSpec.consumes, arrConsumesMimeTypeStrings) && arrayEquals(verbHandlerSpec.produces, arrProducesMimeTypeStrings)) {
+				hit = new ResourceMethod(verbHandlerSpec, this.controller, this, this.mappings);
 				return;
 			}
 		});
-		if(hit)
+		if (hit)
 			return;
 	}.bind(this));
 	return hit;
@@ -487,7 +489,7 @@ Resource.prototype.find = function(sVerb, arrConsumesMimeTypeStrings, arrProduce
  * Returns the configuration of this resource.
  *
  */
-Resource.prototype.configuration = function(){
+Resource.prototype.configuration = function () {
 	return this.cfg;
 };
 
@@ -497,9 +499,9 @@ Resource.prototype.configuration = function(){
  *
  * @param {Function|String}
  */
-Resource.prototype.redirect = function(fRedirector){
-	if(typeof fRedirector === 'string'){
-		fRedirector = function(){
+Resource.prototype.redirect = function (fRedirector) {
+	if (typeof fRedirector === 'string') {
+		fRedirector = function () {
 			return fRedirector;
 		}
 	}
@@ -509,12 +511,12 @@ Resource.prototype.redirect = function(fRedirector){
 /**
  * Disables the ResourceMethods that match the given constraints
  */
-Resource.prototype.disable = function(sVerb, arrConsumesTypeStrings, arrProducesTypeStrings){
-	Object.keys(this.cfg).filter(function(sVerbName){
-		return !(sVerb === undefined || (sVerb!==undefined && sVerb === sVerbName));
-	}).forEach(function(sVerbName){
-		this.cfg[sVerbName].forEach(function(verbHandlerSpec, i, verbHandlerSpecs){
-			if(arrayEquals(verbHandlerSpec.consumes, arrConsumesTypeStrings) && arrayEquals(verbHandlerSpec.produces, arrProducesTypeStrings))
+Resource.prototype.disable = function (sVerb, arrConsumesTypeStrings, arrProducesTypeStrings) {
+	Object.keys(this.cfg).filter(function (sVerbName) {
+		return !(sVerb === undefined || (sVerb !== undefined && sVerb === sVerbName));
+	}).forEach(function (sVerbName) {
+		this.cfg[sVerbName].forEach(function (verbHandlerSpec, i, verbHandlerSpecs) {
+			if (arrayEquals(verbHandlerSpec.consumes, arrConsumesTypeStrings) && arrayEquals(verbHandlerSpec.produces, arrProducesTypeStrings))
 				verbHandlerSpecs.splice(i, 1);
 		});
 	});
@@ -524,9 +526,9 @@ Resource.prototype.disable = function(sVerb, arrConsumesTypeStrings, arrProduces
 /**
  * Disables all but 'read' HTTP methods in this resource.
  */
-Resource.prototype.readonly = function(){
-	Object.keys(this.cfg).forEach(function(method){
-		if(['get','head','trace'].indexOf(method)<0)
+Resource.prototype.readonly = function () {
+	Object.keys(this.cfg).forEach(function (method) {
+		if (['get', 'head', 'trace'].indexOf(method) < 0)
 			delete this.cfg[method];
 	}.bind(this));
 	return this;
@@ -551,15 +553,15 @@ Resource.prototype.readonly = function(){
  * @returns {ResourceMappings}
  * @static
  */
-var ResourceMappings = exports.ResourceMappings = function(oConfiguration, controller){
+var ResourceMappings = exports.ResourceMappings = function (oConfiguration, controller) {
 	this.resources = {};
-	if(oConfiguration){
-		Object.keys(oConfiguration).forEach(function(sPath){
+	if (oConfiguration) {
+		Object.keys(oConfiguration).forEach(function (sPath) {
 			this.resources[sPath] = this.resource(sPath, oConfiguration[sPath], controller);
 		}.bind(this));
 	}
 
-	if(controller){
+	if (controller) {
 		this.controller = controller;
 		this.execute = controller.execute.bind(controller);
 	}
@@ -573,8 +575,8 @@ var ResourceMappings = exports.ResourceMappings = function(oConfiguration, contr
  *
  * @returns {Resource}
  */
-ResourceMappings.prototype.path = ResourceMappings.prototype.resourcePath = ResourceMappings.prototype.resource = function(sPath, oConfiguration){
-	if(this.resources[sPath] === undefined)
+ResourceMappings.prototype.path = ResourceMappings.prototype.resourcePath = ResourceMappings.prototype.resource = function (sPath, oConfiguration) {
+	if (this.resources[sPath] === undefined)
 		this.resources[sPath] = new Resource(sPath, oConfiguration, this.controller, this);
 	return this.resources[sPath];
 };
@@ -582,9 +584,9 @@ ResourceMappings.prototype.path = ResourceMappings.prototype.resourcePath = Reso
 /**
  * Returns the configuration object for this ResourceMappings.
  */
-ResourceMappings.prototype.configuration = function(){
+ResourceMappings.prototype.configuration = function () {
 	const _cfg = {};
-	Object.keys(this.resources).forEach(function(sPath){
+	Object.keys(this.resources).forEach(function (sPath) {
 		_cfg[sPath] = this.resources[sPath].configuration();
 	}.bind(this));
 	return _cfg;
@@ -593,8 +595,8 @@ ResourceMappings.prototype.configuration = function(){
 /**
  * Removes all but GET resource handlers.
  */
-ResourceMappings.prototype.readonly = function(){
-	Object.keys(this.resources).forEach(function(sPath){
+ResourceMappings.prototype.readonly = function () {
+	Object.keys(this.resources).forEach(function (sPath) {
 		this.resources[sPath].readonly();
 	}.bind(this));
 	return this;
@@ -603,8 +605,8 @@ ResourceMappings.prototype.readonly = function(){
 /**
  * Disables resource handling specifications mathcing the arguments, effectively removing them from this API.
  */
-ResourceMappings.prototype.disable = function(sPath, sVerb, arrConsumes, arrProduces){
-	Object.keys(this.resources[sPath]).forEach(function(resource){
+ResourceMappings.prototype.disable = function (sPath, sVerb, arrConsumes, arrProduces) {
+	Object.keys(this.resources[sPath]).forEach(function (resource) {
 		resource.disable(sVerb, arrConsumes, arrProduces);
 	}.bind(this));
 	return this;
@@ -613,10 +615,10 @@ ResourceMappings.prototype.disable = function(sPath, sVerb, arrConsumes, arrProd
 /**
  * Provides a reference to a handler specification matching the supplied arguments.
  */
-ResourceMappings.prototype.find = function(sPath, sVerb, arrConsumes, arrProduces){
-	if(this.resources[sPath]){
+ResourceMappings.prototype.find = function (sPath, sVerb, arrConsumes, arrProduces) {
+	if (this.resources[sPath]) {
 		const hit = this.resources[sPath].find(sVerb, arrConsumes, arrProduces);
-		if(hit)
+		if (hit)
 			return hit;
 	}
 	return;
@@ -635,74 +637,61 @@ ResourceMappings.prototype.find = function(sPath, sVerb, arrConsumes, arrProduce
  * @param {ResourceMappings|Object} [oMappings] the mappings configuration for this controller.
  *
  */
-var HttpController = exports.HttpController = function(oMappings){
+var HttpController = exports.HttpController = function (oMappings) {
 	this.logger = require('log/logging').getLogger('http.rs.controller');
 	//var xss = require("utils/xss");
 
 	const self = this;
 
-	const matchRequestUrl = function (requestPath, method, cfg) {
-		var pathDefs = Object.keys(cfg);
-		var matches = [];
-		for (var i = 0; i < pathDefs.length; i++) {
-			var pathDef = pathDefs[i];
-			var resolvedPath;
-			if (pathDef === requestPath) {
-				resolvedPath = pathDef;
-				matches.push({w: 1, p: resolvedPath, d: pathDef});
-			} else {
-				var pathDefSegments = pathDef.split('/');
-				var reqPathSegments;
-				if (requestPath.trim().length > 0)
-					reqPathSegments = requestPath.split('/');
-				else
-					reqPathSegments = [];
-				if (pathDefSegments.length === reqPathSegments.length) {
-					var verbHandlers = Object.keys(cfg[pathDef]);
-					if (verbHandlers && verbHandlers.length > 0 && verbHandlers.indexOf(method) > -1) {
-						var pathParams = {};
-						var resolvedPathDefSegments = pathDefSegments.map(function (pSeg, i) {
-							pSeg = pSeg.trim();
-							var matcher = pSeg.match(/{(.*?)}/);
-							if (matcher !== null) {
-								var param = matcher[1];
-								pathParams[param] = reqPathSegments[i];
-								return reqPathSegments[i];
-							} else {
-								return pSeg;
-							}
-						});
-						var p = resolvedPathDefSegments.join('/');
-						if (p === requestPath) {
-							resolvedPath = p;
-							var match = {w: 0, p: resolvedPath, d: pathDef};
-							if (Object.keys(pathParams).length > 0) {
-								match.pathParams = pathParams;
-							}
-							matches.push(match);
-						}
-					}
-				}
+	function matchRequestUrl(requestPath, method, cfg) {
+		return Object.entries(cfg)
+			.filter(([_, handlers]) => handlers && handlers[method])
+			.map(([path, _]) => path)
+			.reduce((matches, path) => matchingRouteDefinitionsReducer(matches, path, requestPath), [])
+			.sort(matchedRouteDefinitionsSorter);
+	}
+
+	function matchingRouteDefinitionsReducer(matchedDefinitions, definedPath, requestPath) {
+		const matches = match(transformPathParamsDeclaredInBraces(definedPath));
+		const matched = matches(requestPath);
+		if (matched) {
+			const matchedDefinition = {
+				p: requestPath,
+				d: definedPath,
+				pathParams: Array.isArray(matched.params) ? matched.params.join("/") : matched.params
+			};
+			matchedDefinitions.push(matchedDefinition);
+		}
+		return matchedDefinitions;
+	}
+
+	function matchedRouteDefinitionsSorter(p, n) {
+		p.w = calculateMatchedRouteWeight(p);
+		n.w = calculateMatchedRouteWeight(n);
+
+		if (n.w === p.w) {
+			//the one with less placeholders wins
+			var m1 = p.d.match(/{(.*?)}/g);
+			var placeholdersCount1 = m1 !== null ? m1.length : 0;
+			var m2 = n.d.match(/{(.*?)}/g);
+			var placeholdersCount2 = m2 !== null ? m2.length : 0;
+			if (placeholdersCount1 > placeholdersCount2) {
+				n.w = n.w + 1;
+			} else if (placeholdersCount1 < placeholdersCount2) {
+				p.w = p.w + 1;
 			}
 		}
-		//sort matches by weight
-		matches = matches.sort(function (p, n) {
-			if (n.w === p.w) {
-				//the one with less placeholders wins
-				var m1 = p.d.match(/{(.*?)}/g);
-				var placeholdersCount1 = m1 !== null ? m1.length : 0;
-				var m2 = n.d.match(/{(.*?)}/g);
-				var placeholdersCount2 = m2 !== null ? m2.length : 0;
-				if (placeholdersCount1 > placeholdersCount2) {
-					n.w = n.w + 1;
-				} else if (placeholdersCount1 < placeholdersCount2) {
-					p.w = p.w + 1;
-				}
-			}
-			return n.w - p.w;
-		});
-		return matches;
-	};
+		return n.w - p.w;
+	}
+
+	function calculateMatchedRouteWeight(matchedRoute) {
+		return (matchedRoute.params && matchedRoute.params.length > 0) ? 0 : 1; // always prefer exact route definitions - set weight to 1
+	}
+
+	function transformPathParamsDeclaredInBraces(pathDefinition) {
+		const pathParamsInBracesMatcher = /({(\w*\*?)})/g; // matches cases like '/api/{pathParam}' or '/api/{pathParam*}'
+		return pathDefinition.replace(pathParamsInBracesMatcher, ":$2"); // transforms matched cases to '/api/:pathParam' or '/api/:pathParam*'
+	}
 
 	//  content-type, consumes
 	//  accepts, produces
@@ -777,18 +766,18 @@ var HttpController = exports.HttpController = function(oMappings){
 		this.sendError(httpErrorCode, errorCode, errorName, errorMessage);
 	};
 
-	this.execute = function(request, response){
-  		request = request || require("http/v4/request");
+	this.execute = function (request, response) {
+		request = request || require("http/v4/request");
 		var requestPath = request.getResourcePath();
 		var method = request.getMethod().toLowerCase();
 		var _oConfiguration = self.resourceMappings.configuration();
 
 		var matches = matchRequestUrl(requestPath, method, _oConfiguration);
 		var resourceHandler;
-		if(matches && matches[0]){
+		if (matches && matches[0]) {
 			var verbHandlers = _oConfiguration[matches[0].d][method];
-			if(verbHandlers){
-				resourceHandler = verbHandlers.filter(function(handlerDef){
+			if (verbHandlers) {
+				resourceHandler = verbHandlers.filter(function (handlerDef) {
 					return matchMediaType(request, handlerDef.produces, handlerDef.consumes);
 				})[0];
 			}
@@ -800,15 +789,15 @@ var HttpController = exports.HttpController = function(oMappings){
 		const contentTypeHeader = normalizeMediaTypeHeaderValue(request.getHeader('Content-Type')) || '[]';
 		const resourcePath = requestPath;
 
-		if(resourceHandler){
+		if (resourceHandler) {
 			const ctx = {
 				"pathParameters": {},
 				"queryParameters": {}
 			};
-			if(matches[0].pathParams){
-				ctx.pathParameters =  matches[0].pathParams;
+			if (matches[0].pathParams) {
+				ctx.pathParameters = request.params = matches[0].pathParams;
 			}
-			ctx.queryParameters = queryParams;
+			ctx.queryParameters = request.query = queryParams;
 
 			const noop = function () {
 			};
@@ -823,65 +812,67 @@ var HttpController = exports.HttpController = function(oMappings){
 			});
 			_finally = resourceHandler.finally || noop;
 			const callbackArgs = [ctx, request, response, resourceHandler, this];
-			try{
-		 		self.logger.trace('Before serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}]', resourcePath, method.toUpperCase(), contentTypeHeader, acceptsHeader);
+			try {
+				self.logger.trace('Before serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}]', resourcePath, method.toUpperCase(), contentTypeHeader, acceptsHeader);
 				_before.apply(self, callbackArgs);
-				if(!response.isCommitted()){
+				if (!response.isCommitted()) {
 					self.logger.trace('Serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}]', resourcePath, method.toUpperCase(), contentTypeHeader, acceptsHeader);
 					_serve.apply(this, callbackArgs);
 					self.logger.trace('Serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}] finished', resourcePath, method.toUpperCase(), contentTypeHeader, acceptsHeader);
 				}
-			} catch(err){
-				try{
+			} catch (err) {
+				try {
 					callbackArgs.splice(1, 0, err);
 					_catch.apply(self, callbackArgs);
-				} catch(_catchErr){
+				} catch (_catchErr) {
 					self.logger.error('Serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}] error handler threw error', _catchErr);
 					throw _catchErr;
 				}
-			} finally{
+			} finally {
 				HttpController.prototype.closeResponse.call(this);
-				try{
+				try {
 					_finally.apply(self, []);
-				} catch(_finallyErr){
+				} catch (_finallyErr) {
 					self.logger.error('Serving request for Resource[{}], Method[{}], Content-Type[{}], Accept[{}] post handler threw error', _finallyErr);
 				}
 			}
 		} else {
-			self.logger.error('No suitable resource handler for Resource[' + resourcePath + '], Method['+method.toUpperCase()+'], Content-Type['+contentTypeHeader+'], Accept['+acceptsHeader+'] found');
+			self.logger.error('No suitable resource handler for Resource[' + resourcePath + '], Method[' + method.toUpperCase() + '], Content-Type[' + contentTypeHeader + '], Accept[' + acceptsHeader + '] found');
 			self.sendError(response.BAD_REQUEST, undefined, 'Bad Request', 'No suitable processor for this request.');
 		}
-  	};
+	};
+
+	this.listen = this.execute;
 
 
-	if(oMappings instanceof ResourceMappings){
+	if (oMappings instanceof ResourceMappings) {
 		this.resourceMappings = oMappings;
-	} else if(typeof oMappings === 'object' || 'undefined') {
-		 this.resourceMappings = new ResourceMappings(oMappings, this);
+	} else if (typeof oMappings === 'object' || 'undefined') {
+		this.resourceMappings = new ResourceMappings(oMappings, this);
 	}
 
 	this.resource = this.resourcePath = this.resourceMappings.resourcePath.bind(this.resourceMappings);
 
 	//weave-in HTTP method-based factory functions - shortcut for service().resource(sPath).method
-	['get','post','put','delete','remove','method'].forEach(function(sMethodName){
-			this[sMethodName] = function(sPath, sVerb, arrConsumes, arrProduces){
-				if(arguments.length < 1)
-					throw Error('Insufficient arguments provided to HttpController method ' + sMethodName + '.');
-				if(sPath === undefined)
-					sPath = "";
-				const resource = this.resourceMappings.find(sPath, sVerb, arrConsumes, arrProduces) || this.resourceMappings.resource(sPath);
-				resource[sMethodName]['apply'](resource, Array.prototype.slice.call(arguments, 1));
-				return this;
-			}.bind(this);
-		}.bind(this));
+	['get', 'post', 'put', 'delete', 'remove', 'method'].forEach(function (sMethodName) {
+		this[sMethodName] = function (sPath, sVerb, arrConsumes, arrProduces) {
+			if (arguments.length < 1)
+				throw Error('Insufficient arguments provided to HttpController method ' + sMethodName + '.');
+			if (sPath === undefined)
+				sPath = "";
+			const resource = this.resourceMappings.find(sPath, sVerb, arrConsumes, arrProduces) || this.resourceMappings.resource(sPath);
+			resource[sMethodName]['apply'](resource, Array.prototype.slice.call(arguments, 1));
+			return this;
+		}.bind(this);
+	}.bind(this));
 
 };
 
-HttpController.prototype.mappings = function() {
+HttpController.prototype.mappings = function () {
 	return this.resourceMappings;
 };
 
-HttpController.prototype.sendError = function(httpErrorCode, applicationErrorCode, errorName, errorDetails) {
+HttpController.prototype.sendError = function (httpErrorCode, applicationErrorCode, errorName, errorDetails) {
 	const request = require("http/v4/request");
 	const clientAcceptMediaTypes = this.normalizeMediaTypeHeaderValue(request.getHeader('Accept')) || ['application/json'];
 	const isHtml = clientAcceptMediaTypes.some(function (acceptMediaType) {
@@ -889,7 +880,7 @@ HttpController.prototype.sendError = function(httpErrorCode, applicationErrorCod
 	}.bind(this));
 	const response = require("http/v4/response");
 	response.setStatus(httpErrorCode || response.INTERNAL_SERVER_ERROR);
-	if(isHtml){
+	if (isHtml) {
 		const message = errorName + (applicationErrorCode !== undefined ? '[' + applicationErrorCode + ']' : '') + (errorDetails ? ': ' + errorDetails : '');
 		response.sendError(httpErrorCode || response.INTERNAL_SERVER_ERROR, message);
 	} else {
@@ -899,12 +890,12 @@ HttpController.prototype.sendError = function(httpErrorCode, applicationErrorCod
 			"details": errorDetails
 		};
 		response.setHeader("Content-Type", "application/json");
-	    response.print(JSON.stringify(body, null, 2));
+		response.print(JSON.stringify(body, null, 2));
 	}
 	this.closeResponse();
 };
 
-HttpController.prototype.closeResponse = function(){
+HttpController.prototype.closeResponse = function () {
 	const response = require("http/v4/response");
 	response.flush();
 	response.close();
@@ -923,13 +914,13 @@ HttpController.prototype.closeResponse = function(){
  * @param {Object|ResourceMappings} [oMappings] configuration object or configuration builder with configuration() getter function
  *
  */
-exports.service = function(oConfig){
+exports.service = function (oConfig) {
 	let config;
-	if(oConfig!==undefined){
-		if(typeof oConfig === 'object' || oConfig instanceof ResourceMappings){
+	if (oConfig !== undefined) {
+		if (typeof oConfig === 'object' || oConfig instanceof ResourceMappings) {
 			config = oConfig;
 		} else {
-			throw Error('Illegal argument type: oConfig['+(typeof oConfig)+']');
+			throw Error('Illegal argument type: oConfig[' + (typeof oConfig) + ']');
 		}
 	}
 	return new HttpController(config);
